@@ -1,0 +1,22 @@
+# Core Web Framework
+fastapi
+uvicorn[standard]
+
+# Database & ORM
+sqlalchemy
+
+# AI & Machine Learning
+groq
+langchain
+sentence-transformers
+pandas
+numpy
+
+# Configuration & Security
+python-dotenv
+pyjwt
+bcrypt
+
+# HTTP Requests & Utilities
+httpx
+pydantic

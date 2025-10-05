@@ -1,0 +1,53 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary-50: #f5f7ff;
+  --color-primary-100: #ebefff;
+  --color-primary-200: #dce3ff;
+  --color-primary-300: #c3cdff;
+  --color-primary-400: #a5adff;
+  --color-primary-500: #667eea;
+  --color-primary-600: #5568d3;
+  --color-primary-700: #4451bc;
+  --color-primary-800: #363aa5;
+  --color-primary-900: #2d2e8e;
+  
+  --color-secondary-50: #faf5ff;
+  --color-secondary-100: #f3e8ff;
+  --color-secondary-200: #e9d5ff;
+  --color-secondary-300: #d8b4fe;
+  --color-secondary-400: #c084fc;
+  --color-secondary-500: #764ba2;
+  --color-secondary-600: #6b3d91;
+  --color-secondary-700: #5f3080;
+  --color-secondary-800: #53236f;
+  --color-secondary-900: #47165e;
+}
+
+/* Custom base styles */
+body {
+  background-color: rgb(249 250 251);
+  font-family: system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom component styles */
+.btn-primary {
+  background: linear-gradient(to right, var(--color-primary-500), var(--color-secondary-500));
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.btn-primary:hover {
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+}
+
+.card {
+  background-color: white;
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  padding: 1.5rem;
+}

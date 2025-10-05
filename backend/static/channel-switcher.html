@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Omnichannel Demo - AI Sales Agent</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 40px 20px;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      .header {
+        text-align: center;
+        color: white;
+        margin-bottom: 40px;
+      }
+
+      .header h1 {
+        font-size: 48px;
+        margin-bottom: 10px;
+      }
+
+      .header p {
+        font-size: 20px;
+        opacity: 0.9;
+      }
+
+      .session-info {
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+
+      .session-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+      }
+
+      .session-label {
+        font-weight: 600;
+        color: #666;
+      }
+
+      .session-value {
+        font-family: monospace;
+        background: #f0f0f0;
+        padding: 8px 12px;
+        border-radius: 6px;
+      }
+
+      .create-session-btn {
+        width: 100%;
+        padding: 15px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.2s;
+      }
+
+      .create-session-btn:hover {
+        transform: scale(1.02);
+      }
+
+      .channels-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+      }
+
+      .channel-card {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s, box-shadow 0.3s;
+        cursor: pointer;
+      }
+
+      .channel-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+      }
+
+      .channel-header {
+        padding: 30px;
+        text-align: center;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+      }
+
+      .channel-icon {
+        font-size: 64px;
+        margin-bottom: 10px;
+      }
+
+      .channel-name {
+        font-size: 24px;
+        font-weight: 600;
+        margin-bottom: 5px;
+      }
+
+      .channel-status {
+        font-size: 14px;
+        opacity: 0.9;
+      }
+
+      .channel-body {
+        padding: 20px;
+      }
+
+      .channel-description {
+        color: #666;
+        margin-bottom: 20px;
+        line-height: 1.6;
+      }
+
+      .channel-features {
+        margin-bottom: 20px;
+      }
+
+      .feature-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+        font-size: 14px;
+        color: #666;
+      }
+
+      .feature-check {
+        color: #4ade80;
+        font-weight: bold;
+      }
+
+      .open-channel-btn {
+        width: 100%;
+        padding: 12px;
+        background: #667eea;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+
+      .open-channel-btn:hover {
+        background: #5568d3;
+      }
+
+      .open-channel-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .context-info {
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+
+      .context-title {
+        font-size: 24px;
+        font-weight: 600;
+        margin-bottom: 20px;
+        color: #333;
+      }
+
+      .context-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+      }
+
+      .context-stat {
+        text-align: center;
+        padding: 20px;
+        background: #f9fafb;
+        border-radius: 8px;
+      }
+
+      .stat-value {
+        font-size: 32px;
+        font-weight: bold;
+        color: #667eea;
+        margin-bottom: 5px;
+      }
+
+      .stat-label {
+        font-size: 14px;
+        color: #666;
+      }
+
+      .demo-flow {
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        margin-top: 30px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+
+      .flow-title {
+        font-size: 24px;
+        font-weight: 600;
+        margin-bottom: 20px;
+        color: #333;
+      }
+
+      .flow-steps {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .flow-step {
+        flex: 1;
+        min-width: 150px;
+        text-align: center;
+        padding: 20px;
+        background: #f9fafb;
+        border-radius: 8px;
+        position: relative;
+      }
+
+      .flow-step:not(:last-child)::after {
+        content: "→";
+        position: absolute;
+        right: -15px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 24px;
+        color: #667eea;
+      }
+
+      .step-number {
+        width: 40px;
+        height: 40px;
+        background: #667eea;
+        color: white;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        margin-bottom: 10px;
+      }
+
+      .step-label {
+        font-size: 14px;
+        font-weight: 600;
+        color: #333;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>🚀 Omnichannel Demo</h1>
+        <p>Experience Seamless AI Shopping Across All Channels</p>
+      </div>
+      <div class="session-info">
+        <div class="session-row">
+          <span class="session-label">Session ID:</span>
+          <span class="session-value" id="sessionId">Not created yet</span>
+        </div>
+        <div class="session-row">
+          <span class="session-label">Current Channel:</span>
+          <span class="session-value" id="currentChannel">None</span>
+        </div>
+        <div class="session-row">
+          <span class="session-label">Cart Items:</span>
+          <span class="session-value" id="cartItems">0</span>
+        </div>
+        <button
+          class="create-session-btn"
+          id="createSessionBtn"
+          onclick="createSession()"
+        >
+          Create New Session
+        </button>
+      </div>
+
+      <div class="channels-grid">
+        <div class="channel-card" id="webCard">
+          <div class="channel-header">
+            <div class="channel-icon">💻</div>
+            <div class="channel-name">Web Chat</div>
+            <div class="channel-status">Desktop Experience</div>
+          </div>
+          <div class="channel-body">
+            <div class="channel-description">
+              Rich web interface with product cards, quick replies, and
+              interactive elements.
+            </div>
+            <div class="channel-features">
+              <div class="feature-item">
+                <span class="feature-check">✓</span>
+                <span>Product cards with images</span>
+              </div>
+              <div class="feature-item">
+                <span class="feature-check">✓</span>
+                <span>Quick reply buttons</span>
+              </div>
+              <div class="feature-item">
+                <span class="feature-check">✓</span>
+                <span>Live cart updates</span>
+              </div>
+            </div>
+            <button
+              class="open-channel-btn"
+              onclick="openChannel('web')"
+              disabled
+            >
+              Open Web Chat
+            </button>
+          </div>
+        </div>
+
+        <div class="channel-card" id="whatsappCard">
+          <div
+            class="channel-header"
+            style="
+              background: linear-gradient(135deg, #25d366 0%, #128c7e 100%);
+            "
+          >
+            <div class="channel-icon">💬</div>
+            <div class="channel-name">WhatsApp</div>
+            <div class="channel-status">Mobile Messaging</div>
+          </div>
+          <div class="channel-body">
+            <div class="channel-description">
+              Text-based interface with emoji support, optimized for mobile
+              messaging.
+            </div>
+            <div class="channel-features">
+              <div class="feature-item">
+                <span class="feature-check">✓</span>
+                <span>Text + emoji format</span>
+              </div>
+              <div class="feature-item">
+                <span class="feature-check">✓</span>
+                <span>Quick reply buttons</span>
+              </div>
+              <div class="feature-item">
+                <span class="feature-check">✓</span>
+                <span>Mobile optimized</span>
+              </div>
+            </div>
+            <button
+              class="open-channel-btn"
+              onclick="openChannel('whatsapp')"
+              disabled
+            >
+              Open WhatsApp
+            </button>
+          </div>
+        </div>
+
+        <div class="channel-card" id="kioskCard">
+          <div
+            class="channel-header"
+            style="
+              background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            "
+          >
+            <div class="channel-icon">🏪</div>
+            <div class="channel-name">In-Store Kiosk</div>
+            <div class="channel-status">Physical Store</div>
+          </div>
+          <div class="channel-body">
+            <div class="channel-description">
+              Large touch-screen interface with voice support and staff
+              assistance.
+            </div>
+            <div class="channel-features">
+              <div class="feature-item">
+                <span class="feature-check">✓</span>
+                <span>Large product tiles</span>
+              </div>
+              <div class="feature-item">
+                <span class="feature-check">✓</span>
+                <span>Aisle locations</span>
+              </div>
+              <div class="feature-item">
+                <span class="feature-check">✓</span>
+                <span>Call associate button</span>
+              </div>
+            </div>
+            <button
+              class="open-channel-btn"
+              onclick="openChannel('kiosk')"
+              disabled
+            >
+              Open Kiosk
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="context-info">
+        <div class="context-title">📊 Context Preservation Demo</div>
+        <div class="context-grid">
+          <div class="context-stat">
+            <div class="stat-value" id="channelSwitches">0</div>
+            <div class="stat-label">Channel Switches</div>
+          </div>
+          <div class="context-stat">
+            <div class="stat-value" id="messagesCount">0</div>
+            <div class="stat-label">Total Messages</div>
+          </div>
+          <div class="context-stat">
+            <div class="stat-value" id="cartCount">0</div>
+            <div class="stat-label">Items in Cart</div>
+          </div>
+          <div class="context-stat">
+            <div class="stat-value">100%</div>
+            <div class="stat-label">Context Retained</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="demo-flow">
+        <div class="flow-title">🎯 Recommended Demo Flow</div>
+        <div class="flow-steps">
+          <div class="flow-step">
+            <div class="step-number">1</div>
+            <div class="step-label">Start on Web<br />Browse Products</div>
+          </div>
+          <div class="flow-step">
+            <div class="step-number">2</div>
+            <div class="step-label">Switch to WhatsApp<br />Continue Chat</div>
+          </div>
+          <div class="flow-step">
+            <div class="step-number">3</div>
+            <div class="step-label">Visit Kiosk<br />Complete Purchase</div>
+          </div>
+          <div class="flow-step">
+            <div class="step-number">4</div>
+            <div class="step-label">Verify Context<br />Cart Preserved</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const API_URL = "http://localhost:8000";
+      let sessionId = null;
+      let channelSwitches = 0;
+
+      async function createSession() {
+        try {
+          const response = await fetch(
+            `${API_URL}/session/create?customer_id=1&channel=web`,
+            {
+              method: "POST",
+            }
+          );
+          const data = await response.json();
+
+          if (data.success) {
+            sessionId = data.session_id;
+            document.getElementById("sessionId").textContent = sessionId;
+            document.getElementById("currentChannel").textContent = "web";
+
+            // Enable all channel buttons
+            document.querySelectorAll(".open-channel-btn").forEach((btn) => {
+              btn.disabled = false;
+            });
+
+            document.getElementById("createSessionBtn").textContent =
+              "Session Active ✓";
+            document.getElementById("createSessionBtn").disabled = true;
+
+            // Start polling for cart updates
+            startCartPolling();
+          }
+        } catch (error) {
+          console.error("Failed to create session:", error);
+          alert("Failed to create session. Please try again.");
+        }
+      }
+
+      async function openChannel(channel) {
+        if (!sessionId) {
+          alert("Please create a session first!");
+          return;
+        }
+
+        // Update channel in backend
+        try {
+          await fetch(
+            `${API_URL}/session/switch-channel?session_id=${sessionId}&new_channel=${channel}`,
+            {
+              method: "POST",
+            }
+          );
+
+          channelSwitches++;
+          document.getElementById("channelSwitches").textContent =
+            channelSwitches;
+          document.getElementById("currentChannel").textContent = channel;
+        } catch (error) {
+          console.error("Failed to switch channel:", error);
+        }
+
+        // Open channel in new window
+        let url;
+        switch (channel) {
+          case "web":
+            url = `/chat?session=${sessionId}`;
+            break;
+          case "whatsapp":
+            url = `/whatsapp?session=${sessionId}`;
+            break;
+          case "kiosk":
+            url = `/kiosk?session=${sessionId}`;
+            break;
+        }
+
+        window.open(url, `${channel}_window`, "width=800,height=900");
+      }
+
+      async function startCartPolling() {
+        setInterval(async () => {
+          if (!sessionId) return;
+
+          try {
+            const response = await fetch(`${API_URL}/cart/${sessionId}`);
+            const data = await response.json();
+
+            if (data.success) {
+              document.getElementById("cartItems").textContent =
+                data.cart_count;
+              document.getElementById("cartCount").textContent =
+                data.cart_count;
+            }
+          } catch (error) {
+            console.error("Failed to fetch cart:", error);
+          }
+        }, 2000); // Poll every 2 seconds
+      }
+    </script>
+  </body>
+</html>

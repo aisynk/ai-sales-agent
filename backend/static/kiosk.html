@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>In-Store Kiosk - AI Sales Agent</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Arial", sans-serif;
+        background: #000;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .kiosk-screen {
+        width: 90vw;
+        height: 85vh;
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        border-radius: 20px;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      }
+
+      .kiosk-header {
+        background: rgba(0, 0, 0, 0.3);
+        color: white;
+        padding: 30px;
+        text-align: center;
+      }
+
+      .store-logo {
+        font-size: 48px;
+        margin-bottom: 10px;
+      }
+
+      .store-name {
+        font-size: 32px;
+        font-weight: bold;
+      }
+
+      .store-tagline {
+        font-size: 18px;
+        opacity: 0.9;
+        margin-top: 5px;
+      }
+
+      .kiosk-content {
+        flex: 1;
+        display: flex;
+        gap: 20px;
+        padding: 30px;
+        overflow: hidden;
+      }
+
+      .chat-section {
+        flex: 1;
+        background: white;
+        border-radius: 15px;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+
+      .chat-messages {
+        flex: 1;
+        padding: 20px;
+        overflow-y: auto;
+        background: #f5f5f5;
+      }
+
+      .message {
+        margin-bottom: 20px;
+        display: flex;
+        gap: 15px;
+      }
+
+      .message.ai .message-bubble {
+        background: #2a5298;
+        color: white;
+      }
+
+      .message.user .message-bubble {
+        background: #e0e0e0;
+        color: #333;
+      }
+
+      .message-bubble {
+        padding: 15px 20px;
+        border-radius: 12px;
+        font-size: 20px;
+        max-width: 70%;
+      }
+
+      .product-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+        margin-top: 20px;
+      }
+
+      .product-tile {
+        background: white;
+        border: 3px solid #2a5298;
+        border-radius: 12px;
+        padding: 15px;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-align: center;
+      }
+
+      .product-tile:hover {
+        transform: scale(1.05);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      }
+
+      .product-icon {
+        font-size: 60px;
+        margin-bottom: 10px;
+      }
+
+      .product-name {
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 5px;
+      }
+
+      .product-price {
+        font-size: 24px;
+        color: #2a5298;
+        font-weight: bold;
+      }
+
+      .product-location {
+        font-size: 14px;
+        color: #666;
+        margin-top: 5px;
+      }
+
+      .input-section {
+        padding: 20px;
+        background: white;
+        border-top: 2px solid #ddd;
+      }
+
+      .input-row {
+        display: flex;
+        gap: 15px;
+      }
+
+      .kiosk-input {
+        flex: 1;
+        padding: 20px;
+        font-size: 24px;
+        border: 3px solid #2a5298;
+        border-radius: 12px;
+        outline: none;
+      }
+
+      .kiosk-btn {
+        padding: 20px 40px;
+        background: #2a5298;
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 24px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background 0.3s;
+      }
+
+      .kiosk-btn:hover {
+        background: #1e3c72;
+      }
+
+      .kiosk-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .action-buttons {
+        flex: 0 0 300px;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      .action-button {
+        background: white;
+        border: 3px solid #2a5298;
+        border-radius: 15px;
+        padding: 30px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s;
+      }
+
+      .action-button:hover {
+        background: #2a5298;
+        color: white;
+        transform: scale(1.05);
+      }
+
+      .action-icon {
+        font-size: 48px;
+        margin-bottom: 10px;
+      }
+
+      .action-label {
+        font-size: 20px;
+        font-weight: bold;
+      }
+
+      .qr-code {
+        width: 150px;
+        height: 150px;
+        background: white;
+        margin: 10px auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 80px;
+        border-radius: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="kiosk-screen">
+      <div class="kiosk-header">
+        <div class="store-logo">🏪</div>
+        <div class="store-name">PREMIUM RETAIL STORE</div>
+        <div class="store-tagline">AI-Powered Shopping Assistant</div>
+      </div>
+
+      <div class="kiosk-content">
+        <div class="chat-section">
+          <div class="chat-messages" id="chatMessages">
+            <div class="message ai">
+              <div class="message-bubble">
+                Welcome to our store! 👋<br />
+                How can I help you find the perfect items today?
+              </div>
+            </div>
+          </div>
+
+          <div class="input-section">
+            <div class="input-row">
+              <input
+                type="text"
+                class="kiosk-input"
+                id="messageInput"
+                placeholder="Tell me what you're looking for..."
+                autocomplete="off"
+              />
+              <button class="kiosk-btn" id="sendBtn">SEND</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="action-buttons">
+          <div class="action-button" onclick="callAssociate()">
+            <div class="action-icon">👤</div>
+            <div class="action-label">Call<br />Associate</div>
+          </div>
+
+          <div class="action-button" onclick="showQR()">
+            <div class="action-icon">📱</div>
+            <div class="action-label">Continue<br />on Phone</div>
+          </div>
+
+          <div class="action-button" onclick="viewCart()">
+            <div class="action-icon">🛒</div>
+            <div class="action-label">View Cart</div>
+          </div>
+
+          <div class="action-button" onclick="startOver()">
+            <div class="action-icon">🔄</div>
+            <div class="action-label">Start Over</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const API_URL = "http://localhost:8000";
+      let sessionId = null;
+      const customerId = 1;
+
+      // Get session ID from URL if present
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlSessionId = urlParams.get("session");
+
+      async function initializeSession() {
+        if (urlSessionId) {
+          sessionId = urlSessionId;
+          console.log("Using session from URL:", sessionId);
+        } else {
+          try {
+            const response = await fetch(
+              `${API_URL}/session/create?customer_id=${customerId}&channel=instore`,
+              {
+                method: "POST",
+              }
+            );
+            const data = await response.json();
+            if (data.success) {
+              sessionId = data.session_id;
+              console.log("Session created:", sessionId);
+            }
+          } catch (error) {
+            console.error("Failed to initialize session:", error);
+          }
+        }
+      }
+
+      function addMessage(text, isUser = false, products = null) {
+        const container = document.getElementById("chatMessages");
+
+        const messageDiv = document.createElement("div");
+        messageDiv.className = `message ${isUser ? "user" : "ai"}`;
+
+        const bubble = document.createElement("div");
+        bubble.className = "message-bubble";
+        bubble.innerHTML = text.replace(/\n/g, "<br>");
+
+        if (products && products.length > 0) {
+          const grid = document.createElement("div");
+          grid.className = "product-grid";
+
+          products.forEach((product) => {
+            const tile = document.createElement("div");
+            tile.className = "product-tile";
+            tile.onclick = () => addToCart(product.product_id);
+
+            tile.innerHTML = `
+                    <div class="product-icon">👗</div>
+                    <div class="product-name">${product.name}</div>
+                    <div class="product-price">$${product.price}</div>
+                    <div class="product-location">${
+                      product.aisle || "Ask Associate"
+                    }</div>
+                `;
+
+            grid.appendChild(tile);
+          });
+
+          bubble.appendChild(grid);
+        }
+
+        messageDiv.appendChild(bubble);
+        container.appendChild(messageDiv);
+        container.scrollTop = container.scrollHeight;
+      }
+
+      async function sendMessage(text) {
+        const input = document.getElementById("messageInput");
+        const sendBtn = document.getElementById("sendBtn");
+
+        if (!text) text = input.value.trim();
+        if (!text || !sessionId) return;
+
+        addMessage(text, true);
+        input.value = "";
+        sendBtn.disabled = true;
+
+        try {
+          console.log("Sending with session:", sessionId);
+          const response = await fetch(
+            `${API_URL}/channel-chat?message=${encodeURIComponent(
+              text
+            )}&channel=instore&customer_id=${customerId}&session_id=${sessionId}`,
+            {
+              method: "POST",
+            }
+          );
+
+          const data = await response.json();
+
+          if (data.success) {
+            const aiData = data.data;
+            addMessage(
+              aiData.display_text || aiData.voice_text,
+              false,
+              aiData.product_tiles
+            );
+          } else {
+            addMessage("Sorry, please try again or call an associate.", false);
+          }
+        } catch (error) {
+          console.error("Error:", error);
+          addMessage("Please try again or call an associate for help.", false);
+        } finally {
+          sendBtn.disabled = false;
+        }
+      }
+
+      async function addToCart(productId) {
+        if (!sessionId) {
+          console.error("No session ID");
+          return;
+        }
+
+        console.log("Adding to cart:", productId, "Session:", sessionId);
+
+        try {
+          const response = await fetch(`${API_URL}/cart/add`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              session_id: sessionId,
+              product_id: productId,
+              quantity: 1,
+            }),
+          });
+
+          const data = await response.json();
+          console.log("Cart response:", data);
+
+          if (data.success) {
+            addMessage(
+              `✅ Added to cart! Total items: ${data.total_items}`,
+              false
+            );
+          }
+        } catch (error) {
+          console.error("Error adding to cart:", error);
+        }
+      }
+
+      function callAssociate() {
+        addMessage("🔔 Calling a store associate to help you...", false);
+        setTimeout(() => {
+          addMessage("A store associate will be with you shortly!", false);
+        }, 1500);
+      }
+
+      function showQR() {
+        const qrHTML = `
+            <div style="text-align: center; margin-top: 20px;">
+                <div class="qr-code">📱</div>
+                <div style="font-size: 18px;">Scan to continue on your phone<br>Session: ${sessionId}</div>
+            </div>
+        `;
+        addMessage(qrHTML, false);
+      }
+
+      function viewCart() {
+        if (!sessionId) return;
+
+        fetch(`${API_URL}/cart/${sessionId}`)
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.success) {
+              let cartText = `🛒 Your Cart (${data.cart_count} items):\n\n`;
+              data.cart.forEach((item) => {
+                cartText += `• ${item.name} x${item.quantity} = $${item.subtotal}\n`;
+              });
+              cartText += `\nSubtotal: $${data.subtotal}`;
+              addMessage(cartText, false);
+            }
+          });
+      }
+
+      function startOver() {
+        document.getElementById("chatMessages").innerHTML = `
+            <div class="message ai">
+                <div class="message-bubble">
+                    Welcome back! How can I help you?
+                </div>
+            </div>
+        `;
+      }
+
+      document
+        .getElementById("messageInput")
+        .addEventListener("keypress", (e) => {
+          if (e.key === "Enter") sendMessage();
+        });
+
+      document.getElementById("sendBtn").addEventListener("click", sendMessage);
+
+      initializeSession();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Testing Guide - AI Sales Agent</title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          sans-serif;
+        max-width: 900px;
+        margin: 50px auto;
+        padding: 20px;
+        background: #f5f5f5;
+      }
+
+      .container {
+        background: white;
+        padding: 40px;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+
+      h1 {
+        color: #333;
+        margin-bottom: 10px;
+      }
+
+      .subtitle {
+        color: #666;
+        margin-bottom: 30px;
+      }
+
+      .test-section {
+        margin-bottom: 40px;
+        padding: 20px;
+        background: #f9fafb;
+        border-left: 4px solid #667eea;
+        border-radius: 8px;
+      }
+
+      h2 {
+        color: #667eea;
+        margin-bottom: 15px;
+      }
+
+      .step {
+        margin: 15px 0;
+        padding-left: 30px;
+        position: relative;
+      }
+
+      .step-number {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 24px;
+        height: 24px;
+        background: #667eea;
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: bold;
+      }
+
+      .expected {
+        background: #ecfdf5;
+        border-left: 3px solid #10b981;
+        padding: 10px 15px;
+        margin: 10px 0;
+        border-radius: 4px;
+      }
+
+      .expected-title {
+        font-weight: 600;
+        color: #059669;
+        margin-bottom: 5px;
+      }
+
+      .code {
+        background: #1f2937;
+        color: #10b981;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-family: monospace;
+        font-size: 14px;
+      }
+
+      .link-button {
+        display: inline-block;
+        padding: 12px 24px;
+        background: #667eea;
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        margin: 10px 10px 10px 0;
+        font-weight: 600;
+        transition: background 0.2s;
+      }
+
+      .link-button:hover {
+        background: #5568d3;
+      }
+
+      .metrics {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-top: 20px;
+      }
+
+      .metric-card {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        text-align: center;
+        border: 2px solid #e5e7eb;
+      }
+
+      .metric-value {
+        font-size: 32px;
+        font-weight: bold;
+        color: #667eea;
+      }
+
+      .metric-label {
+        font-size: 14px;
+        color: #666;
+        margin-top: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🧪 Complete Testing Guide</h1>
+      <p class="subtitle">
+        Follow these steps to test the complete AI Sales Agent system
+      </p>
+
+      <div class="test-section">
+        <h2>🚀 Quick Access Links</h2>
+        <a href="/demo" class="link-button" target="_blank">Omnichannel Demo</a>
+        <a href="/chat" class="link-button" target="_blank">Web Chat</a>
+        <a href="/whatsapp" class="link-button" target="_blank"
+          >WhatsApp Simulator</a
+        >
+        <a href="/kiosk" class="link-button" target="_blank">In-Store Kiosk</a>
+        <a href="/docs" class="link-button" target="_blank"
+          >API Documentation</a
+        >
+      </div>
+
+      <div class="test-section">
+        <h2>📋 Test Scenario: Sarah's Complete Journey</h2>
+
+        <div class="step">
+          <div class="step-number">1</div>
+          <strong>Create Session</strong>
+          <p>
+            Go to <span class="code">/demo</span> and click "Create New Session"
+          </p>
+          <div class="expected">
+            <div class="expected-title">✓ Expected Result:</div>
+            Session ID generated, all channel buttons enabled
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-number">2</div>
+          <strong>Start on Web Chat</strong>
+          <p>Click "Open Web Chat" button</p>
+          <p>
+            Type: <em>"Hi! I'm looking for an elegant dress for a wedding"</em>
+          </p>
+          <div class="expected">
+            <div class="expected-title">✓ Expected Result:</div>
+            • AI greeting with product recommendations<br />
+            • Product cards displayed<br />
+            • Quick reply buttons shown
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-number">3</div>
+          <strong>Add Items to Cart</strong>
+          <p>Click on product cards to add items</p>
+          <div class="expected">
+            <div class="expected-title">✓ Expected Result:</div>
+            • "Added to cart" confirmation<br />
+            • Cart count increases<br />
+            • Context preserved
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-number">4</div>
+          <strong>Switch to WhatsApp</strong>
+          <p>Go back to /demo, click "Open WhatsApp"</p>
+          <p>Type: <em>"What's in my cart?"</em></p>
+          <div class="expected">
+            <div class="expected-title">✓ Expected Result:</div>
+            • WhatsApp shows cart items<br />
+            • All previously added items visible<br />
+            • Context fully preserved<br />
+            • Text + emoji format
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-number">5</div>
+          <strong>Continue on Kiosk</strong>
+          <p>Go back to /demo, click "Open Kiosk"</p>
+          <p>Type: <em>"I'm ready to checkout"</em></p>
+          <div class="expected">
+            <div class="expected-title">✓ Expected Result:</div>
+            • Kiosk shows large interface<br />
+            • Cart items preserved<br />
+            • Staff assistance available<br />
+            • QR code for mobile continuation
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-number">6</div>
+          <strong>Verify Context Preservation</strong>
+          <p>Check /demo page statistics</p>
+          <div class="expected">
+            <div class="expected-title">✓ Expected Result:</div>
+            • Channel switches: 2+<br />
+            • Cart items: Same across all channels<br />
+            • Context retained: 100%<br />
+            • No data loss
+          </div>
+        </div>
+      </div>
+
+      <div class="test-section">
+        <h2>🎯 Expected Business Metrics</h2>
+        <div class="metrics">
+          <div class="metric-card">
+            <div class="metric-value">47%</div>
+            <div class="metric-label">AOV Increase</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value">100%</div>
+            <div class="metric-label">Context Retention</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value">3</div>
+            <div class="metric-label">Channels Integrated</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value">5</div>
+            <div class="metric-label">AI Agents Working</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="test-section">
+        <h2>🔧 API Testing (Swagger UI)</h2>
+        <p>
+          Visit <a href="/docs" target="_blank">/docs</a> to test individual
+          endpoints:
+        </p>
+
+        <div class="step">
+          <div class="step-number">1</div>
+          <strong>POST /session/create</strong>
+          <p>Create a new session with customer_id=1</p>
+        </div>
+
+        <div class="step">
+          <div class="step-number">2</div>
+          <strong>POST /channel-chat</strong>
+          <p>Test different channels (web, whatsapp, instore, mobile)</p>
+        </div>
+
+        <div class="step">
+          <div class="step-number">3</div>
+          <strong>POST /cart/add</strong>
+          <p>Add items to cart and verify persistence</p>
+        </div>
+
+        <div class="step">
+          <div class="step-number">4</div>
+          <strong>POST /session/switch-channel</strong>
+          <p>Switch channels and verify context preservation</p>
+        </div>
+
+        <div class="step">
+          <div class="step-number">5</div>
+          <strong>GET /cart/{session_id}</strong>
+          <p>Verify cart contents across channel switches</p>
+        </div>
+      </div>
+
+      <div class="test-section">
+        <h2>✅ Day 3 Completion Checklist</h2>
+        <p>Verify all these work:</p>
+        <ul style="list-style: none; padding-left: 0">
+          <li>☐ Channel adapters format responses differently</li>
+          <li>☐ Web chat shows rich UI with product cards</li>
+          <li>☐ WhatsApp shows text + emoji format</li>
+          <li>☐ Kiosk shows large touch-friendly interface</li>
+          <li>☐ Can create sessions and get session IDs</li>
+          <li>☐ Can add items to cart</li>
+          <li>☐ Cart persists across channel switches</li>
+          <li>☐ Conversation history maintained</li>
+          <li>☐ All 5 AI agents working together</li>
+          <li>☐ Omnichannel demo fully functional</li>
+        </ul>
+      </div>
+    </div>
+  </body>
+</html>
