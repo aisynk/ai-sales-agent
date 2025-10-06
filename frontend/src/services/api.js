@@ -1,31 +1,21 @@
 import axios from 'axios';
 
-// ============================================
-// CONFIGURATION
-// ============================================
-
-// Your backend server address
 const API_BASE_URL = 'http://localhost:8000';
 
-// Create axios instance with default settings
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 30000, // Wait max 30 seconds for response
+  timeout: 30000,
 });
 
-// ============================================
-// INTERCEPTORS (Middleware)
-// ============================================
-
-// Runs BEFORE every request
+// Request interceptor
 api.interceptors.request.use(
   (config) => {
-    // You could add authentication tokens here
-    // config.headers.Authorization = `Bearer ${token}`;
     console.log('Making request to:', config.url);
+    console.log('Request data:', config.data);
+    console.log('Request params:', config.params);
     return config;
   },
   (error) => {
@@ -34,118 +24,93 @@ api.interceptors.request.use(
   }
 );
 
-// Runs AFTER every response
+// Response interceptor
 api.interceptors.response.use(
-  (response) => {
-    // Return just the data part (not the full axios response)
-    return response.data;
-  },
+  (response) => response.data,
   (error) => {
     console.error('Response error:', error);
+    console.error('Error details:', error.response?.data);
     return Promise.reject(error);
   }
 );
 
 // ============================================
-// SESSION API CALLS
+// API ENDPOINTS
 // ============================================
 
+// SESSION API
 export const sessionAPI = {
-  // Create a new session
   create: (customerId, channel = 'web') => 
     api.post('/session/create', null, { 
       params: { customer_id: customerId, channel } 
     }),
   
-  // Get session details
   get: (sessionId) => 
     api.get(`/session/${sessionId}`),
-  
-  // Switch to different channel (web -> whatsapp -> kiosk)
-  switchChannel: (sessionId, newChannel) => 
-    api.post('/session/switch-channel', null, { 
-      params: { session_id: sessionId, new_channel: newChannel } 
-    }),
 };
 
-// ============================================
-// CHAT API CALLS
-// ============================================
-
+// CHAT API - Query params format (what your backend expects)
 export const chatAPI = {
-  // Send message to AI
-  sendMessage: (data) => 
-    api.post('/channel-chat', null, { params: data }),
+  sendMessage: (sessionId, message, channel = 'web') => {
+    console.log('=== CHAT API DEBUG ===');
+    console.log('SessionID:', sessionId);
+    console.log('Message:', message);
+    console.log('Channel:', channel);
+    
+    // Send as query parameters, NOT body
+    return api.post('/channel-chat', null, {
+      params: {
+        message: message,
+        channel: channel,
+        session_id: sessionId,
+      }
+    });
+  },
 };
 
-// ============================================
-// CART API CALLS
-// ============================================
-
+// CART API
 export const cartAPI = {
-  // Get cart contents
   get: (sessionId) => 
     api.get(`/cart/${sessionId}`),
   
-  // Add item to cart
   add: (data) => 
     api.post('/cart/add', data),
   
-  // Remove item from cart
   remove: (sessionId, productId) => 
     api.post('/cart/remove', null, { 
       params: { session_id: sessionId, product_id: productId } 
     }),
 };
 
-// ============================================
-// PRODUCTS API CALLS
-// ============================================
-
+// PRODUCTS API
 export const productsAPI = {
-  // Get all products
   getAll: () => 
     api.get('/products'),
   
-  // Search products with filters
   search: (params) => 
     api.post('/products/search', params),
   
-  // Get filter options (categories, brands, etc.)
   getFilters: () => 
     api.get('/products/filters'),
 };
 
-// ============================================
-// RECOMMENDATIONS API CALLS
-// ============================================
-
+// RECOMMENDATIONS API
 export const recommendationsAPI = {
-  // Get AI product recommendations
   get: (params) => 
     api.post('/recommendations', null, { params }),
 };
 
-// ============================================
-// CHECKOUT API CALLS
-// ============================================
-
+// CHECKOUT API
 export const checkoutAPI = {
-  // Process payment
   process: (data) => 
     api.post('/checkout', data),
 };
 
-// ============================================
-// LOYALTY API CALLS
-// ============================================
-
+// LOYALTY API
 export const loyaltyAPI = {
-  // Get loyalty info
   getInfo: (customerId) => 
     api.get(`/loyalty/${customerId}`),
   
-  // Get personalized offers
   getOffers: (customerId) => 
     api.get(`/loyalty/${customerId}/offers`),
 };
