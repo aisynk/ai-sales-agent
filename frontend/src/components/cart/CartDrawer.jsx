@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import useStore from '../../store/useStore';
 import { cartAPI } from '../../services/api';
 import Button from '../common/Button';
+import EmptyState from '../common/EmptyState';
 
 const CartDrawer = () => {
   const navigate = useNavigate();
@@ -39,6 +40,34 @@ const CartDrawer = () => {
       refetch();
     },
   });
+
+  // ✅ NEW: Update quantity mutation
+  const updateQuantityMutation = useMutation({
+    mutationFn: async ({ productId, newQuantity }) => {
+      // Remove item first
+      await cartAPI.remove(sessionId, productId);
+      
+      // Re-add with new quantity if > 0
+      if (newQuantity > 0) {
+        await cartAPI.add({
+          session_id: sessionId,
+          product_id: productId,
+          quantity: newQuantity
+        });
+      }
+    },
+    onSuccess: () => {
+      refetch(); // Refresh cart data
+    },
+  });
+
+  // ✅ NEW: Handle quantity updates
+  const handleUpdateQuantity = (productId, currentQuantity, change) => {
+    const newQuantity = currentQuantity + change;
+    if (newQuantity < 1) return;
+    
+    updateQuantityMutation.mutate({ productId, newQuantity });
+  };
 
   const handleCheckout = () => {
     closeCart();
@@ -79,18 +108,13 @@ const CartDrawer = () => {
         {/* Cart items */}
         <div className="flex-1 overflow-y-auto p-6">
           {!cart || cart.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full text-center">
-              <div className="text-6xl mb-4">🛒</div>
-              <h3 className="text-lg font-semibold text-gray-700 mb-2">
-                Your cart is empty
-              </h3>
-              <p className="text-gray-500 mb-6">
-                Add some products to get started!
-              </p>
-              <Button onClick={closeCart}>
-                Continue Shopping
-              </Button>
-            </div>
+            <EmptyState
+    icon="🛒"
+    title="Your cart is empty"
+    message="Add some products to get started!"
+    actionLabel="Continue Shopping"
+    onAction={closeCart}
+  />
           ) : (
             <div className="space-y-4">
               {cart.map((item) => (
@@ -107,13 +131,21 @@ const CartDrawer = () => {
                     </h4>
                     <p className="text-sm text-gray-500">{item.brand}</p>
                     
-                    {/* Quantity controls */}
+                    {/* ✅ FIXED: Quantity controls now work */}
                     <div className="flex items-center space-x-2 mt-2">
-                      <button className="p-1 hover:bg-gray-200 rounded">
+                      <button 
+                        onClick={() => handleUpdateQuantity(item.product_id, item.quantity, -1)}
+                        className="p-1 hover:bg-gray-200 rounded disabled:opacity-50"
+                        disabled={item.quantity <= 1 || updateQuantityMutation.isPending}
+                      >
                         <Minus size={14} />
                       </button>
                       <span className="font-medium">{item.quantity}</span>
-                      <button className="p-1 hover:bg-gray-200 rounded">
+                      <button 
+                        onClick={() => handleUpdateQuantity(item.product_id, item.quantity, 1)}
+                        className="p-1 hover:bg-gray-200 rounded disabled:opacity-50"
+                        disabled={updateQuantityMutation.isPending}
+                      >
                         <Plus size={14} />
                       </button>
                     </div>

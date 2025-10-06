@@ -1,19 +1,13 @@
 import React from 'react';
 import ProductCard from './ProductCard';
+import { ProductCardSkeleton } from '../common/LoadingSkeleton';
 
 const ProductGrid = ({ products, loading = false, error = null }) => {
   if (loading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {[...Array(8)].map((_, i) => (
-          <div key={i} className="animate-pulse">
-            <div className="bg-gray-200 h-64 rounded-t-xl"></div>
-            <div className="bg-white p-4 rounded-b-xl">
-              <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-              <div className="h-4 bg-gray-200 rounded w-1/2 mb-4"></div>
-              <div className="h-10 bg-gray-200 rounded"></div>
-            </div>
-          </div>
+          <ProductCardSkeleton key={i} />
         ))}
       </div>
     );
@@ -22,8 +16,15 @@ const ProductGrid = ({ products, loading = false, error = null }) => {
   if (error) {
     return (
       <div className="text-center py-12">
-        <p className="text-red-500 mb-4">Failed to load products</p>
-        <button className="text-primary-600 hover:underline">Try again</button>
+        <div className="text-6xl mb-4">⚠️</div>
+        <p className="text-red-500 mb-4 text-lg font-semibold">Failed to load products</p>
+        <p className="text-gray-600 mb-6">Please check your connection and try again</p>
+        <button 
+          onClick={() => window.location.reload()} 
+          className="px-6 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
+        >
+          Retry
+        </button>
       </div>
     );
   }

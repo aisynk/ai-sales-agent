@@ -4,14 +4,13 @@ import { useMutation } from '@tanstack/react-query';
 import useStore from '../../store/useStore';
 import { chatAPI, sessionAPI } from '../../services/api';
 import ChatMessage from './ChatMessage';
-import ProductCard from '../products/ProductCard';
 
 const ChatWidget = () => {
   const { 
     isChatOpen, 
     closeChat, 
-    sessionId, 
-    setSession, 
+    sessionId,  // Get sessionId
+    setSessionId, // Get setter
     customerId,
     currentChannel 
   } = useStore();
@@ -19,7 +18,7 @@ const ChatWidget = () => {
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
-      content: "Hi! 👋 I'm your AI shopping assistant. I can help you find products, check availability, and complete your purchase. What are you looking for today?",
+      content: "Hi! 👋 I'm your AI shopping assistant. How can I help you today?",
       timestamp: new Date().toISOString(),
     }
   ]);
@@ -30,36 +29,43 @@ const ChatWidget = () => {
   // Initialize session
   useEffect(() => {
     if (isChatOpen && !sessionId) {
+      console.log('Creating session...');
       sessionAPI.create(customerId, currentChannel)
         .then(response => {
-          if (response.success) {
-            setSession(response.session_id, response.channel);
+          console.log('Session response:', response);
+          if (response.success && response.session_id) {
+            setSessionId(response.session_id); // Save sessionId as STRING
+            console.log('Session created:', response.session_id);
           }
         })
         .catch(error => console.error('Failed to create session:', error));
     }
-  }, [isChatOpen, sessionId, customerId, currentChannel, setSession]);
+  }, [isChatOpen, sessionId, customerId, currentChannel, setSessionId]);
 
-  // Auto-scroll to bottom
+  // Auto-scroll
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Send message mutation
+  // Send message mutation - FIXED
   const sendMessageMutation = useMutation({
-    mutationFn: (message) => chatAPI.sendMessage({
-      message,
-      channel: currentChannel,
-      customer_id: customerId,
-      session_id: sessionId,
-    }),
+    mutationFn: (message) => {
+      console.log('=== MUTATION DEBUG ===');
+      console.log('SessionID:', sessionId, 'Type:', typeof sessionId);
+      console.log('Message:', message, 'Type:', typeof message);
+      
+      // CRITICAL: Pass sessionId and message as STRINGS
+      return chatAPI.sendMessage(sessionId, message, currentChannel);
+    },
     onSuccess: (data) => {
-      if (data.success) {
+      console.log('AI response:', data);
+      if (data.success || data.data || data.response) {
+        const responseData = data.data || data;
         const aiMessage = {
           role: 'assistant',
-          content: data.data.message,
-          recommendations: data.data.product_cards || data.data.recommendations,
-          suggestions: data.data.quick_replies || data.data.suggestions,
+          content: responseData.message || responseData.response || 'Got it!',
+          recommendations: responseData.product_cards || responseData.recommendations,
+          suggestions: responseData.quick_replies || responseData.suggestions,
           timestamp: new Date().toISOString(),
         };
         setMessages(prev => [...prev, aiMessage]);
@@ -67,6 +73,7 @@ const ChatWidget = () => {
     },
     onError: (error) => {
       console.error('Failed to send message:', error);
+      console.error('Error response:', error.response?.data);
       setMessages(prev => [...prev, {
         role: 'assistant',
         content: "Sorry, I'm having trouble connecting. Please try again.",
@@ -77,24 +84,30 @@ const ChatWidget = () => {
 
   const handleSendMessage = (e) => {
     e.preventDefault();
-    if (!inputMessage.trim() || !sessionId) return;
+    
+    const trimmedMessage = inputMessage.trim();
+    if (!trimmedMessage) return;
+    
+    if (!sessionId) {
+      alert('Connecting... Please wait.');
+      return;
+    }
 
     // Add user message
     const userMessage = {
       role: 'user',
-      content: inputMessage,
+      content: trimmedMessage,
       timestamp: new Date().toISOString(),
     };
     setMessages(prev => [...prev, userMessage]);
     
-    // Send to API
-    sendMessageMutation.mutate(inputMessage);
+    // Send to API - pass message string directly
+    sendMessageMutation.mutate(trimmedMessage);
     setInputMessage('');
   };
 
   const handleSuggestionClick = (suggestion) => {
     setInputMessage(suggestion);
-    handleSendMessage({ preventDefault: () => {} });
   };
 
   if (!isChatOpen) return null;
@@ -115,41 +128,46 @@ const ChatWidget = () => {
               🤖
             </div>
             <div>
-              <h3 className="font-semibold">AI Sales Assistant</h3>
-              <p className="text-xs opacity-90">Online • Instant replies</p>
+              <h3 className="font-semibold">AI Assistant</h3>
+              <p className="text-xs opacity-90">
+                {sessionId ? 'Online' : 'Connecting...'}
+              </p>
             </div>
           </div>
           <div className="flex items-center space-x-2">
             <button
               onClick={() => setIsMinimized(!isMinimized)}
               className="p-1 hover:bg-white/20 rounded transition-colors"
-              aria-label="Minimize"
             >
               <Minimize2 size={20} />
             </button>
             <button
               onClick={closeChat}
               className="p-1 hover:bg-white/20 rounded transition-colors"
-              aria-label="Close chat"
             >
               <X size={20} />
             </button>
           </div>
         </div>
 
-        {/* Messages */}
         {!isMinimized && (
           <>
+            {/* Messages */}
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
               {messages.map((message, index) => (
-                <ChatMessage key={index} message={message} />
+                <ChatMessage 
+                  key={index} 
+                  message={message} 
+                  onSuggestionClick={handleSuggestionClick}
+                />
               ))}
               
-              {/* Loading indicator */}
               {sendMessageMutation.isPending && (
-                <div className="flex items-center space-x-2 text-gray-500">
-                  <Loader2 className="animate-spin" size={16} />
-                  <span className="text-sm">AI is thinking...</span>
+                <div className="flex justify-start">
+                  <div className="bg-gray-100 p-3 rounded-2xl flex items-center space-x-2">
+                    <Loader2 className="animate-spin" size={16} />
+                    <span className="text-sm">Thinking...</span>
+                  </div>
                 </div>
               )}
               
@@ -163,15 +181,14 @@ const ChatWidget = () => {
                   type="text"
                   value={inputMessage}
                   onChange={(e) => setInputMessage(e.target.value)}
-                  placeholder="Type your message..."
+                  placeholder={sessionId ? "Type your message..." : "Connecting..."}
                   className="flex-1 px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-primary-500"
-                  disabled={sendMessageMutation.isPending}
+                  disabled={sendMessageMutation.isPending || !sessionId}
                 />
                 <button
                   type="submit"
-                  disabled={!inputMessage.trim() || sendMessageMutation.isPending}
-                  className="bg-gradient-to-r from-primary-500 to-secondary-500 text-white p-2 rounded-full hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                  aria-label="Send message"
+                  disabled={!inputMessage.trim() || sendMessageMutation.isPending || !sessionId}
+                  className="bg-gradient-to-r from-primary-500 to-secondary-500 text-white p-2 rounded-full hover:shadow-lg transition-all disabled:opacity-50"
                 >
                   <Send size={20} />
                 </button>

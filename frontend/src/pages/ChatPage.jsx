@@ -5,13 +5,14 @@ import useStore from '../store/useStore';
 import { chatAPI, sessionAPI } from '../services/api';
 import ChatMessage from '../components/chat/ChatMessage';
 import Button from '../components/common/Button';
+import { motion } from 'framer-motion';
 
 const ChatPage = () => {
-  const { sessionId, setSession, customerId, currentChannel } = useStore();
+  const { sessionId, setSessionId, customerId, currentChannel } = useStore();
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
-      content: "Hello! I'm your AI shopping assistant. I can help you find products, check availability, answer questions, and complete your purchase. What are you looking for today?",
+      content: "Hello! I'm your AI shopping assistant. How can I help you today?",
       timestamp: new Date().toISOString(),
     }
   ]);
@@ -23,62 +24,77 @@ const ChatPage = () => {
     if (!sessionId) {
       sessionAPI.create(customerId, currentChannel)
         .then(response => {
-          if (response.success) {
-            setSession(response.session_id, response.channel);
+          if (response.success && response.session_id) {
+            setSessionId(response.session_id);
           }
         })
         .catch(error => console.error('Failed to create session:', error));
     }
-  }, [sessionId, customerId, currentChannel, setSession]);
+  }, [sessionId, customerId, currentChannel, setSessionId]);
 
   // Auto-scroll
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Send message
+  // Send message - FIXED
   const sendMessageMutation = useMutation({
-    mutationFn: (message) => chatAPI.sendMessage({
-      message,
-      channel: currentChannel,
-      customer_id: customerId,
-      session_id: sessionId,
-    }),
+    mutationFn: (message) => {
+      return chatAPI.sendMessage(sessionId, message, currentChannel);
+    },
     onSuccess: (data) => {
-      if (data.success) {
+      console.log('Response:', data);
+      if (data.success || data.data || data.response) {
+        const responseData = data.data || data;
         const aiMessage = {
           role: 'assistant',
-          content: data.data.message,
-          recommendations: data.data.product_cards || data.data.recommendations,
-          suggestions: data.data.quick_replies || data.data.suggestions,
+          content: responseData.message || responseData.response || 'Received!',
+          recommendations: responseData.product_cards || responseData.recommendations,
+          suggestions: responseData.quick_replies || responseData.suggestions,
           timestamp: new Date().toISOString(),
         };
         setMessages(prev => [...prev, aiMessage]);
       }
     },
+    onError: (error) => {
+      console.error('Chat error:', error);
+      setMessages(prev => [...prev, {
+        role: 'assistant',
+        content: "Error connecting. Please try again.",
+        timestamp: new Date().toISOString(),
+      }]);
+    },
   });
 
   const handleSendMessage = (e) => {
     e.preventDefault();
-    if (!inputMessage.trim() || !sessionId) return;
+    const trimmedMessage = inputMessage.trim();
+    if (!trimmedMessage || !sessionId) return;
 
     const userMessage = {
       role: 'user',
-      content: inputMessage,
+      content: trimmedMessage,
       timestamp: new Date().toISOString(),
     };
     setMessages(prev => [...prev, userMessage]);
-    sendMessageMutation.mutate(inputMessage);
+    sendMessageMutation.mutate(trimmedMessage);
     setInputMessage('');
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8 h-[calc(100vh-64px)]">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      className="max-w-4xl mx-auto px-4 py-8 h-[calc(100vh-64px)]"
+    >
       <div className="bg-white rounded-xl shadow-lg h-full flex flex-col">
         {/* Header */}
         <div className="bg-gradient-to-r from-primary-500 to-secondary-500 text-white p-6 rounded-t-xl">
           <h1 className="text-2xl font-bold">AI Shopping Assistant</h1>
-          <p className="text-sm opacity-90">Ask me anything about products, availability, or orders</p>
+          <p className="text-sm opacity-90">
+            {sessionId ? 'Connected' : 'Connecting...'}
+          </p>
         </div>
 
         {/* Messages */}
@@ -104,13 +120,13 @@ const ChatPage = () => {
               type="text"
               value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}
-              placeholder="Type your message..."
+              placeholder={sessionId ? "Type your message..." : "Connecting..."}
               className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-              disabled={sendMessageMutation.isPending}
+              disabled={sendMessageMutation.isPending || !sessionId}
             />
             <Button
               type="submit"
-              disabled={!inputMessage.trim() || sendMessageMutation.isPending}
+              disabled={!inputMessage.trim() || sendMessageMutation.isPending || !sessionId}
               className="px-6"
             >
               <Send size={20} />
@@ -118,7 +134,7 @@ const ChatPage = () => {
           </form>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

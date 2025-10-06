@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { MessageSquare, ShoppingBag, Zap, Shield } from 'lucide-react';
 import Button from '../components/common/Button';
 import useStore from '../store/useStore';
+import { motion } from 'framer-motion';
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -33,6 +34,13 @@ const HomePage = () => {
 
   return (
     <div>
+      <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0, y: -20 }}
+    transition={{ duration: 0.3 }}
+  ></motion.div>
+
       {/* Hero Section */}
       <section className="bg-gradient-to-r from-primary-500 to-secondary-500 text-white py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -44,21 +52,25 @@ const HomePage = () => {
               Your personal shopping assistant that understands your style
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <Button
-                onClick={openChat}
-                size="lg"
-                variant="secondary"
-              >
-                Start Shopping with AI
-              </Button>
-              <Button
-                onClick={() => navigate('/products')}
-                size="lg"
-                className="bg-white text-primary-600 hover:bg-gray-100"
-              >
-                Browse Products
-              </Button>
-            </div>
+  <Button
+    onClick={() => {
+      navigate('/products');
+      // Optionally open chat after navigating
+      setTimeout(() => openChat(), 500);
+    }}
+    size="lg"
+    variant="secondary"
+  >
+    Start Shopping with AI
+  </Button>
+  <Button
+    onClick={() => navigate('/products')}
+    size="lg"
+    className="bg-white text-primary-600 hover:bg-gray-100"
+  >
+    Browse Products
+  </Button>
+</div>
           </div>
         </div>
       </section>
@@ -93,9 +105,15 @@ const HomePage = () => {
           <p className="text-xl text-gray-600 mb-8">
             Experience the future of online shopping today
           </p>
-          <Button onClick={openChat} size="lg">
-            Chat with AI Assistant
-          </Button>
+          <Button 
+  onClick={() => {
+    navigate('/chat');
+  }} 
+  size="lg" 
+  className="mx-auto block"
+>
+  Chat with AI Assistant
+</Button>
         </div>
       </section>
     </div>

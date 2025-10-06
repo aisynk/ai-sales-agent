@@ -7,6 +7,7 @@ import { checkoutAPI, cartAPI, loyaltyAPI } from '../services/api';
 import Button from '../components/common/Button';
 import Input from '../components/common/Input';
 import Card from '../components/common/Card';
+import { motion } from 'framer-motion';
 
 const CheckoutPage = () => {
   const navigate = useNavigate();
@@ -61,6 +62,12 @@ const CheckoutPage = () => {
   if (orderComplete && orderData) {
     return (
       <div className="max-w-2xl mx-auto px-4 py-16 text-center">
+        <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0, y: -20 }}
+    transition={{ duration: 0.3 }}
+  ></motion.div>
         <div className="bg-white rounded-xl shadow-lg p-8">
           <CheckCircle className="w-20 h-20 text-green-500 mx-auto mb-4" />
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Order Confirmed!</h1>
@@ -165,7 +172,9 @@ const CheckoutPage = () => {
                     onChange={(e) => setApplyLoyalty(e.target.checked)}
                     className="mr-2"
                   />
-                  <span className="text-sm">Use loyalty points (${loyaltyData.points_value} discount)</span>
+                  <span className="text-sm">
+  Use loyalty points (${(loyaltyData.loyalty_points * 0.01).toFixed(2)} discount)
+</span>
                 </label>
               </div>
             )}

@@ -5,9 +5,13 @@ import { productsAPI } from '../services/api';
 import ProductGrid from '../components/products/ProductGrid';
 import Input from '../components/common/Input';
 import Button from '../components/common/Button';
+import { motion } from 'framer-motion';
+import { useDebounce } from '../hooks/useDebounce';
+import ErrorMessage from '../components/common/ErrorMessage';
 
 const ProductsPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
+  const debouncedSearch = useDebounce(searchQuery, 500); // ADD THIS
   const [filters, setFilters] = useState({
     category: '',
     min_price: '',
@@ -25,7 +29,7 @@ const ProductsPage = () => {
 
   // Search products
   const { data: productsData, isLoading, error } = useQuery({
-    queryKey: ['products', searchQuery, filters],
+  queryKey: ['products', debouncedSearch, filters], // Use debouncedSearch
     queryFn: () => productsAPI.search({
       query: searchQuery,
       ...filters,
@@ -51,6 +55,12 @@ const ProductsPage = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0, y: -20 }}
+    transition={{ duration: 0.3 }}
+  ></motion.div>
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-4">Products</h1>
@@ -171,12 +181,23 @@ const ProductsPage = () => {
         </div>
       )}
 
-      {/* Products Grid */}
-      <ProductGrid
-        products={productsData?.products}
-        loading={isLoading}
-        error={error}
-      />
+      {/* Products Grid / Error State */}
+{error && (
+  <ErrorMessage
+    title="Failed to load products"
+    message="We couldn't load the products. Please check your connection and try again."
+    onRetry={() => window.location.reload()}
+  />
+)}
+
+{!error && (
+  <ProductGrid
+    products={productsData?.products}
+    loading={isLoading}
+    error={error}
+  />
+)}
+
     </div>
   );
 };
